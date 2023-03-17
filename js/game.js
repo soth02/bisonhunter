@@ -39,6 +39,16 @@ function preload() {
 }
 
 function create() {
+  scoreBoard = document.createElement("div");
+  scoreBoard.style.position = "absolute";
+  scoreBoard.style.left = game.canvas.offsetLeft + "px";
+  scoreBoard.style.top = game.canvas.offsetTop + "px";
+  scoreBoard.style.backgroundColor = "rgba(255, 255, 255, 0.5)";
+  scoreBoard.style.padding = "10px";
+  scoreBoard.style.fontSize = "32px";
+  scoreBoard.style.fontWeight = "bold";
+  scoreBoard.innerText = "Score: 0 lbs";
+  document.body.appendChild(scoreBoard);
   scoreText = this.add.text(16, 16, "Score: 0 lbs", {
     fontSize: "32px",
     fill: "#000",
@@ -75,9 +85,11 @@ function startGame() {
 
   // Set cursor to none and use the custom target cursor
   this.input.setDefaultCursor("none");
+
   this.input.on(
     "pointerdown",
-    () => {
+    function (pointer) {
+      pointer.event.preventDefault();
       fireBullet.call(this);
     },
     this
@@ -179,6 +191,8 @@ function spawnBison() {
     bison.setVisible(true);
   }
 
+  bison.setData("hit", false); // Initialize the hit flag
+
   this.tweens.add({
     targets: bison,
     x: game.config.width + 100,
@@ -194,20 +208,26 @@ function spawnBison() {
 function bisonHit(bison, bullet) {
   score += bisonWeight;
   scoreText.setText("Score: " + score + " lbs");
+  scoreBoard.innerText = "Score: " + score + " lbs";
 
   bullet.destroy();
   this.tweens.killTweensOf(bison);
+  bison.setActive(false);
+  bison.data.hit = true;
 
-  let flashTween = this.tweens.add({
+  bison.flashTween = this.tweens.add({
     targets: bison,
-    alpha: 0,
+    alpha: 0.5,
     ease: "Linear",
     duration: 100,
     yoyo: true,
     repeat: 4,
     onComplete: function () {
-      bison.setActive(false);
-      bison.setVisible(false);
+      if (bison.data.hit) {
+        bison.setVisible(false);
+      }
     },
   });
+
+  bison.data.hit = false;
 }
