@@ -26,6 +26,9 @@ var bulletTime = 0;
 var bulletSpeed = 600;
 var spawnTime = 0;
 var startButton;
+var score = 0;
+var scoreText;
+var bisonWeight = 1500;
 
 function preload() {
   this.load.image("target", "assets/target.png");
@@ -36,6 +39,11 @@ function preload() {
 }
 
 function create() {
+  scoreText = this.add.text(16, 16, "Score: 0 lbs", {
+    fontSize: "32px",
+    fill: "#000",
+  });
+
   var bgNumber = Math.floor(Math.random() * 4) + 1;
   this.add.image(0, 0, `bg${bgNumber}`).setOrigin(0, 0);
 
@@ -152,6 +160,8 @@ function fireBullet() {
 }
 
 function spawnBison() {
+  let bisonSize = Math.random() < 0.5 ? 0.5 : 1.5;
+  bisonWeight = bisonSize === 0.5 ? 500 : 3000;
   let bison = bisonGroup.getChildren().find((child) => !child.active);
 
   if (!bison) {
@@ -160,9 +170,11 @@ function spawnBison() {
       this.physics.world.bounds.height * Math.random(),
       "bs3"
     );
+    bison.setScale(bisonSize);
     bisonGroup.add(bison);
   } else {
     bison.setPosition(-100, this.physics.world.bounds.height * Math.random());
+    bison.setScale(bisonSize);
     bison.setActive(true);
     bison.setVisible(true);
   }
@@ -180,6 +192,9 @@ function spawnBison() {
 }
 
 function bisonHit(bison, bullet) {
+  score += bisonWeight;
+  scoreText.setText("Score: " + score + " lbs");
+
   bullet.destroy();
   this.tweens.killTweensOf(bison);
 
