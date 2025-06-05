@@ -28,6 +28,7 @@ var spawnTime = 0;
 var startButton;
 var score = 0;
 var scoreText;
+var scoreBoard;
 var bisonWeight = 1500;
 
 function preload() {
@@ -215,7 +216,7 @@ function bisonHit(bison, bullet) {
   bison.setActive(false);
   bison.data.hit = true;
 
-  bison.flashTween = this.tweens.add({
+bison.flashTween = this.tweens.add({
     targets: bison,
     alpha: 0.5,
     ease: "Linear",
@@ -225,9 +226,19 @@ function bisonHit(bison, bullet) {
     onComplete: function () {
       if (bison.data.hit) {
         bison.setVisible(false);
+        bison.data.hit = false;
       }
     },
   });
+}
 
-  bison.data.hit = false;
+if (typeof module !== "undefined") {
+  module.exports = { bisonHit, __setTestVars };
+}
+
+function __setTestVars(vars) {
+  if ("scoreText" in vars) scoreText = vars.scoreText;
+  if ("scoreBoard" in vars) scoreBoard = vars.scoreBoard;
+  if ("score" in vars) score = vars.score;
+  if ("bisonWeight" in vars) bisonWeight = vars.bisonWeight;
 }
