@@ -24,6 +24,8 @@ var bisonGroup;
 var bullets;
 var bulletTime = 0;
 var bulletSpeed = 600;
+var MAX_AMMO = 6;
+var ammo = MAX_AMMO;
 var spawnTime = 0;
 var startButton;
 var score = 0;
@@ -37,6 +39,12 @@ function preload() {
   for (var i = 1; i <= 4; i++) {
     this.load.image(`bg${i}`, `assets/bg${i}.png`);
   }
+}
+
+function reload() {
+  setTimeout(function () {
+    ammo = MAX_AMMO;
+  }, 500);
 }
 
 function create() {
@@ -83,6 +91,7 @@ function startGame() {
   );
 
   bullets = this.add.group(); // Initialize bullets group
+  this.input.keyboard.on('keydown-R', reload, this);
 
   // Set cursor to none and use the custom target cursor
   this.input.setDefaultCursor("none");
@@ -149,7 +158,7 @@ function update() {
 
 // Updated fireBullet function
 function fireBullet() {
-  if (this.time.now > bulletTime) {
+  if (this.time.now > bulletTime && ammo > 0) {
     // Spawn bullet at the bottom middle of the game board
     var bullet = this.add.circle(
       game.config.width / 2,
@@ -168,6 +177,7 @@ function fireBullet() {
     bullet.setData("velocityX", Math.cos(angle) * bulletSpeed);
     bullet.setData("velocityY", Math.sin(angle) * bulletSpeed);
 
+    ammo -= 1;
     bulletTime = 0;
   }
 }
@@ -233,7 +243,7 @@ bison.flashTween = this.tweens.add({
 }
 
 if (typeof module !== "undefined") {
-  module.exports = { bisonHit, __setTestVars };
+  module.exports = { bisonHit, fireBullet, reload, __setTestVars, __getTestVars };
 }
 
 function __setTestVars(vars) {
@@ -241,4 +251,11 @@ function __setTestVars(vars) {
   if ("scoreBoard" in vars) scoreBoard = vars.scoreBoard;
   if ("score" in vars) score = vars.score;
   if ("bisonWeight" in vars) bisonWeight = vars.bisonWeight;
+  if ("ammo" in vars) ammo = vars.ammo;
+  if ("MAX_AMMO" in vars) MAX_AMMO = vars.MAX_AMMO;
+  if ("bullets" in vars) bullets = vars.bullets;
+}
+
+function __getTestVars() {
+  return { ammo, MAX_AMMO, bullets };
 }
