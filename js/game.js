@@ -27,6 +27,8 @@ var config = {
 
 var game = new Phaser.Game(config);
 
+const GAME_DURATION_MS = 60000;
+
 var target;
 var bisonGroup;
 var bullets;
@@ -38,6 +40,9 @@ var score = 0;
 var scoreText;
 var scoreBoard;
 var bisonWeight = 1500;
+var spawnBisonEvent;
+var gameTimer;
+var gameOverOverlay;
 
 function preload() {
   this.load.image("target", "assets/target.png");
@@ -105,12 +110,14 @@ function startGame() {
     this
   );
 
-  this.time.addEvent({
+  spawnBisonEvent = this.time.addEvent({
     delay: 2000,
     callback: spawnBison,
     callbackScope: this,
     loop: true,
   });
+
+  gameTimer = this.time.delayedCall(GAME_DURATION_MS, endGame, [], this);
 }
 
 // Update function
@@ -243,8 +250,33 @@ bison.flashTween = this.tweens.add({
   });
 }
 
+function endGame() {
+  if (spawnBisonEvent) {
+    spawnBisonEvent.remove(false);
+  }
+  if (this.input && this.input.off) {
+    this.input.off('pointerdown');
+  }
+
+  if (!gameOverOverlay) {
+    gameOverOverlay = document.createElement('div');
+    gameOverOverlay.innerText = 'Game Over';
+    gameOverOverlay.style.position = 'absolute';
+    gameOverOverlay.style.left =
+      game.canvas.offsetLeft + game.canvas.width / 2 - 100 + 'px';
+    gameOverOverlay.style.top =
+      game.canvas.offsetTop + game.canvas.height / 2 - 50 + 'px';
+    gameOverOverlay.style.fontSize = '48px';
+    gameOverOverlay.style.fontWeight = 'bold';
+    gameOverOverlay.style.backgroundColor = 'rgba(0,0,0,0.7)';
+    gameOverOverlay.style.color = '#fff';
+    gameOverOverlay.style.padding = '20px';
+    document.body.appendChild(gameOverOverlay);
+  }
+}
+
 if (typeof module !== "undefined") {
-  module.exports = { bisonHit, __setTestVars };
+  module.exports = { bisonHit, endGame, __setTestVars };
 }
 
 function __setTestVars(vars) {
@@ -252,4 +284,6 @@ function __setTestVars(vars) {
   if ("scoreBoard" in vars) scoreBoard = vars.scoreBoard;
   if ("score" in vars) score = vars.score;
   if ("bisonWeight" in vars) bisonWeight = vars.bisonWeight;
+  if ("spawnBisonEvent" in vars) spawnBisonEvent = vars.spawnBisonEvent;
+  if ("game" in vars) game = vars.game;
 }
