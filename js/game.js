@@ -7,7 +7,7 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 
 var config = {
-  type: Phaser.AUTO,
+  type: typeof Phaser !== 'undefined' ? Phaser.AUTO : 0,
   width: 800,
   height: 600,
   scene: {
@@ -25,7 +25,10 @@ var config = {
   },
 };
 
-var game = new Phaser.Game(config);
+var game;
+if (typeof Phaser !== 'undefined') {
+  game = new Phaser.Game(config);
+}
 
 const GAME_DURATION_MS = 60000;
 
