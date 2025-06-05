@@ -1,3 +1,11 @@
+var getHighScore, updateHighScore;
+if (typeof module !== 'undefined' && module.exports) {
+  ({ getHighScore, updateHighScore } = require('./highscore.js'));
+} else {
+  getHighScore = window.getHighScore;
+  updateHighScore = window.updateHighScore;
+}
+
 var config = {
   type: Phaser.AUTO,
   width: 800,
@@ -48,7 +56,8 @@ function create() {
   scoreBoard.style.padding = "10px";
   scoreBoard.style.fontSize = "32px";
   scoreBoard.style.fontWeight = "bold";
-  scoreBoard.innerText = "Score: 0 lbs";
+  scoreBoard.innerText =
+    "Score: 0 lbs (High: " + getHighScore() + " lbs)";
   document.body.appendChild(scoreBoard);
   scoreText = this.add.text(16, 16, "Score: 0 lbs", {
     fontSize: "32px",
@@ -209,7 +218,9 @@ function spawnBison() {
 function bisonHit(bison, bullet) {
   score += bisonWeight;
   scoreText.setText("Score: " + score + " lbs");
-  scoreBoard.innerText = "Score: " + score + " lbs";
+  var high = updateHighScore(score);
+  scoreBoard.innerText =
+    "Score: " + score + " lbs (High: " + high + " lbs)";
 
   bullet.destroy();
   this.tweens.killTweensOf(bison);
