@@ -296,6 +296,8 @@ function __setTestVars(vars) {
   if ("scoreBoard" in vars) scoreBoard = vars.scoreBoard;
   if ("score" in vars) score = vars.score;
   if ("bisonWeight" in vars) bisonWeight = vars.bisonWeight;
+  if ("spawnBisonEvent" in vars) spawnBisonEvent = vars.spawnBisonEvent;
+  if ("game" in vars) game = vars.game;
   if ("ammo" in vars) ammo = vars.ammo;
   if ("MAX_AMMO" in vars) MAX_AMMO = vars.MAX_AMMO;
   if ("bullets" in vars) bullets = vars.bullets;
