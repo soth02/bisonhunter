@@ -1,3 +1,11 @@
+var getHighScore, updateHighScore;
+if (typeof module !== 'undefined' && module.exports) {
+  ({ getHighScore, updateHighScore } = require('./highscore.js'));
+} else {
+  getHighScore = window.getHighScore;
+  updateHighScore = window.updateHighScore;
+}
+
 var config = {
   type: Phaser.AUTO,
   width: 800,
@@ -19,6 +27,8 @@ var config = {
 
 var game = new Phaser.Game(config);
 
+const GAME_DURATION_MS = 60000;
+
 var target;
 var bisonGroup;
 var bullets;
@@ -32,6 +42,9 @@ var score = 0;
 var scoreText;
 var scoreBoard;
 var bisonWeight = 1500;
+var spawnBisonEvent;
+var gameTimer;
+var gameOverOverlay;
 
 function preload() {
   this.load.image("target", "assets/target.png");
@@ -56,7 +69,8 @@ function create() {
   scoreBoard.style.padding = "10px";
   scoreBoard.style.fontSize = "32px";
   scoreBoard.style.fontWeight = "bold";
-  scoreBoard.innerText = "Score: 0 lbs";
+  scoreBoard.innerText =
+    "Score: 0 lbs (High: " + getHighScore() + " lbs)";
   document.body.appendChild(scoreBoard);
   scoreText = this.add.text(16, 16, "Score: 0 lbs", {
     fontSize: "32px",
@@ -105,12 +119,14 @@ function startGame() {
     this
   );
 
-  this.time.addEvent({
+  spawnBisonEvent = this.time.addEvent({
     delay: 2000,
     callback: spawnBison,
     callbackScope: this,
     loop: true,
   });
+
+  gameTimer = this.time.delayedCall(GAME_DURATION_MS, endGame, [], this);
 }
 
 // Update function
@@ -219,7 +235,9 @@ function spawnBison() {
 function bisonHit(bison, bullet) {
   score += bisonWeight;
   scoreText.setText("Score: " + score + " lbs");
-  scoreBoard.innerText = "Score: " + score + " lbs";
+  var high = updateHighScore(score);
+  scoreBoard.innerText =
+    "Score: " + score + " lbs (High: " + high + " lbs)";
 
   bullet.destroy();
   this.tweens.killTweensOf(bison);
@@ -242,8 +260,35 @@ bison.flashTween = this.tweens.add({
   });
 }
 
+function endGame() {
+  if (spawnBisonEvent) {
+    spawnBisonEvent.remove(false);
+  }
+  if (this.input && this.input.off) {
+    this.input.off('pointerdown');
+  }
+
+  if (!gameOverOverlay) {
+    gameOverOverlay = document.createElement('div');
+    gameOverOverlay.innerText = 'Game Over';
+    gameOverOverlay.style.position = 'absolute';
+    gameOverOverlay.style.left =
+      game.canvas.offsetLeft + game.canvas.width / 2 - 100 + 'px';
+    gameOverOverlay.style.top =
+      game.canvas.offsetTop + game.canvas.height / 2 - 50 + 'px';
+    gameOverOverlay.style.fontSize = '48px';
+    gameOverOverlay.style.fontWeight = 'bold';
+    gameOverOverlay.style.backgroundColor = 'rgba(0,0,0,0.7)';
+    gameOverOverlay.style.color = '#fff';
+    gameOverOverlay.style.padding = '20px';
+    document.body.appendChild(gameOverOverlay);
+  }
+}
+
 if (typeof module !== "undefined") {
-  module.exports = { bisonHit, fireBullet, reload, __setTestVars, __getTestVars };
+
+  module.exports = { bisonHit, fireBullet, reload, __setTestVars, __getTestVars, endGame };
+
 }
 
 function __setTestVars(vars) {
@@ -258,4 +303,5 @@ function __setTestVars(vars) {
 
 function __getTestVars() {
   return { ammo, MAX_AMMO, bullets };
+
 }
