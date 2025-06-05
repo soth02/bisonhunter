@@ -50,10 +50,11 @@ var gameTimer;
 var gameOverOverlay;
 
 function preload() {
-  this.load.image("target", "assets/target.png");
-  this.load.image("bs3", "assets/bs3.png");
+  this.load.setPath('assets');
+  this.load.image("target", "target.png");
+  this.load.image("bs3", "bs3.png");
   for (var i = 1; i <= 4; i++) {
-    this.load.image(`bg${i}`, `assets/bg${i}.png`);
+    this.load.image(`bg${i}`, `bg${i}.png`);
   }
 }
 
