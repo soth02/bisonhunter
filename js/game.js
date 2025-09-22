@@ -49,6 +49,27 @@ var spawnBisonEvent;
 var gameTimer;
 var gameOverOverlay;
 
+function setBisonData(bison, key, value) {
+  if (bison && typeof bison.setData === 'function') {
+    bison.setData(key, value);
+  } else {
+    if (!bison.data || typeof bison.data !== 'object') {
+      bison.data = {};
+    }
+    bison.data[key] = value;
+  }
+}
+
+function getBisonData(bison, key) {
+  if (bison && typeof bison.getData === 'function') {
+    var value = bison.getData(key);
+    if (value !== undefined) {
+      return value;
+    }
+  }
+  return bison && bison.data ? bison.data[key] : undefined;
+}
+
 function preload() {
   this.load.setPath('assets');
   this.load.image("target", "target.png");
@@ -222,7 +243,8 @@ function spawnBison() {
     bison.setVisible(true);
   }
 
-  bison.setData("hit", false); // Initialize the hit flag
+  setBisonData(bison, "hit", false); // Initialize the hit flag
+  setBisonData(bison, "weight", bisonWeight);
 
   this.tweens.add({
     targets: bison,
@@ -237,7 +259,8 @@ function spawnBison() {
 }
 
 function bisonHit(bison, bullet) {
-  score += bisonWeight;
+  var weight = getBisonData(bison, "weight");
+  score += typeof weight === "number" ? weight : bisonWeight;
   scoreText.setText("Score: " + score + " lbs");
   var high = updateHighScore(score);
   scoreBoard.innerText =
@@ -246,9 +269,9 @@ function bisonHit(bison, bullet) {
   bullet.destroy();
   this.tweens.killTweensOf(bison);
   bison.setActive(false);
-  bison.data.hit = true;
+  setBisonData(bison, "hit", true);
 
-bison.flashTween = this.tweens.add({
+  bison.flashTween = this.tweens.add({
     targets: bison,
     alpha: 0.5,
     ease: "Linear",
@@ -256,9 +279,9 @@ bison.flashTween = this.tweens.add({
     yoyo: true,
     repeat: 4,
     onComplete: function () {
-      if (bison.data.hit) {
+      if (getBisonData(bison, "hit")) {
         bison.setVisible(false);
-        bison.data.hit = false;
+        setBisonData(bison, "hit", false);
       }
     },
   });
